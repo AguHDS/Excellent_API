@@ -3,7 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
-const allowedOrigins = [
+//quitar todo esto para testear
+/* const allowedOrigins = [
   //always update with the extension id
   "chrome-extension://ogidnlfdldfkccggibioackfhkahnlon",
   "null",
@@ -18,9 +19,15 @@ app.use(
       }
     },
   })
-);
+); */
 
 app.use(express.json());
+
+//para testing
+app.use((req, res, next) => {
+  console.log("Headers recibidos:", req.headers);
+  next();
+});
 
 app.post("/api/gpt", async (req, res) => {
   const clientKey = req.headers["x-extension-key"];
