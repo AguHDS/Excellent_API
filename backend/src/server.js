@@ -3,8 +3,22 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
-//always update with the extension id
-app.use(cors({ origin: "chrome-extension://ogidnlfdldfkccggibioackfhkahnlon"} ));
+const allowedOrigins = [
+  //always update with the extension id
+  "chrome-extension://ogidnlfdldfkccggibioackfhkahnlon",
+  "null",
+];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 
 app.use(express.json());
 
