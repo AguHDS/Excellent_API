@@ -3,24 +3,27 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
-//quitar todo esto para testear
-/* const allowedOrigins = [
-  //always update with the extension id
-  "chrome-extension://ogidnlfdldfkccggibioackfhkahnlon",
-  "null",
-];
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Permití tu extensión y null para entornos embebidos
+      const allowedOrigins = [
+        "chrome-extension://ogidnlfdldfkccggibioackfhkahnlon",
+        "null",
+      ];
+
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "x-extension-key", "x-extension-id"],
   })
-); */
+);
 
+app.options("*", cors());
 app.use(express.json());
 
 //para testing
@@ -32,9 +35,10 @@ app.use((req, res, next) => {
 app.post("/api/gpt", async (req, res) => {
   const clientKey = req.headers["x-extension-key"];
   const validKey = process.env.EXTENSION_KEY;
+  const appscriptKey = process.env.APPSCRIPT_KEY;
 
-  if (!clientKey || clientKey !== validKey) {
-    return res.status(403).json({ error: "Forbidden: invalid client key" });
+  if ((!clientKey || (clientKey !== extensionKey && clientKey !== appscriptKey))) {
+    return res.status(403).json({ error: "Forbidden: invalid key" });
   }
 
   const { prompt } = req.body;
