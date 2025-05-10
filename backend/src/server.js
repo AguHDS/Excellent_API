@@ -27,17 +27,24 @@ app.options("*", cors());
 app.use(express.json());
 
 //para testing
-app.use((req, res, next) => {
-  console.log("Headers recibidos:", req.headers);
-  next();
+app.get("/api/debug", (req, res) => {
+  res.json({
+    extensionKey: process.env.EXTENSION_KEY ? "✅ definida" : "❌ falta",
+    appscriptKey: process.env.APPSCRIPT_KEY ? "✅ definida" : "❌ falta",
+    openaiKey: process.env.OPENAI_APIKEY ? "✅ definida" : "❌ falta",
+    env: process.env.NODE_ENV || "desconocido",
+  });
 });
 
 app.post("/api/gpt", async (req, res) => {
   const clientKey = req.headers["x-extension-key"];
-  const validKey = process.env.EXTENSION_KEY;
+  const extensionKey = process.env.EXTENSION_KEY;
   const appscriptKey = process.env.APPSCRIPT_KEY;
 
-  if ((!clientKey || (clientKey !== extensionKey && clientKey !== appscriptKey))) {
+  if (
+    !clientKey ||
+    (clientKey !== extensionKey && clientKey !== appscriptKey)
+  ) {
     return res.status(403).json({ error: "Forbidden: invalid key" });
   }
 
