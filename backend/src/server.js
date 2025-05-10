@@ -23,18 +23,8 @@ app.use(
   })
 );
 
-app.options("/*", cors());
+app.options("*", cors());
 app.use(express.json());
-
-//para testing
-app.get("/api/debug", (req, res) => {
-  res.json({
-    extensionKey: process.env.EXTENSION_KEY ? "✅ definida" : "❌ falta",
-    appscriptKey: process.env.APPSCRIPT_KEY ? "✅ definida" : "❌ falta",
-    openaiKey: process.env.OPENAI_APIKEY ? "✅ definida" : "❌ falta",
-    env: process.env.NODE_ENV || "desconocido",
-  });
-});
 
 app.post("/api/gpt", async (req, res) => {
   const clientKey = req.headers["x-extension-key"];
