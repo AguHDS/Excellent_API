@@ -2,42 +2,10 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Permití tu extensión y null para entornos embebidos
-      const allowedOrigins = [
-        "chrome-extension://ogidnlfdldfkccggibioackfhkahnlon",
-        "null",
-      ];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "x-extension-key", "x-extension-id"],
-  })
-);
-
-app.options("*", cors());
+app.use(cors());
 app.use(express.json());
 
 app.post("/api/gpt", async (req, res) => {
-  const clientKey = req.headers["x-extension-key"];
-  const extensionKey = process.env.EXTENSION_KEY;
-  const appscriptKey = process.env.APPSCRIPT_KEY;
-
-  if (
-    !clientKey ||
-    (clientKey !== extensionKey && clientKey !== appscriptKey)
-  ) {
-    return res.status(403).json({ error: "Forbidden: invalid key" });
-  }
-
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: "No prompt provided" });
 
@@ -58,13 +26,12 @@ app.post("/api/gpt", async (req, res) => {
 
     const data = await response.json();
 
-    //Validation in case there's an error with api key of OpenAI
+    //Validation in case there's an error with api openAI api key
     if (!data.choices || !data.choices[0]) {
       return res.status(500).json({ error: "OpenAI response malformed" });
     }
 
     res.json({ output: data.choices[0].message.content.trim() });
-    return;
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
