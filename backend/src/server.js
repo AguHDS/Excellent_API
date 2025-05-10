@@ -2,10 +2,20 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-app.use(cors());
+
+//always update with the extension id
+app.use(cors({ origin: "chrome-extension://ogidnlfdldfkccggibioackfhkahnlon"} ));
+
 app.use(express.json());
 
 app.post("/api/gpt", async (req, res) => {
+  const clientKey = req.headers["x-extension-key"];
+  const validKey = process.env.EXTENSION_KEY;
+
+  if (!clientKey || clientKey !== validKey) {
+    return res.status(403).json({ error: "Forbidden: invalid client key" });
+  }
+
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: "No prompt provided" });
 
@@ -32,6 +42,7 @@ app.post("/api/gpt", async (req, res) => {
     }
 
     res.json({ output: data.choices[0].message.content.trim() });
+    return;
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
